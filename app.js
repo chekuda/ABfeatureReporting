@@ -1,15 +1,25 @@
-const rq = require('request');
-const config = require('./appconfig/config');
-const creatematrix = require('./manageData/creatematrix');
+require('dotenv').config({silent: true});
 
-var options = {
-  url: config.appInsights.queryUrl,
-  headers: {
-    'x-api-key': config.appInsights.appInsightsKey
-  }
-};
- 
-function callback(error, response, body) {
+global.__InsightID = process.env.APP_ID;
+global.__InsightKey = process.env.APP_CONECTION_KEY;
+
+const rq = require('request');
+const appInsightConfig = require('./appconfig/config');
+const Slack = require('slack-node');
+const creatematrix = require('./manageData/creatematrix');
+const slackConfig = require('./slackNode/slackconfig');
+
+function slackWebHook (dataFromAppIsights){
+  const slack = new Slack();
+
+  slack.setWebhook(slackConfig.webhookUrl);
+  slackConfig.webhookMessage.attachments = dataFromAppIsights;
+  slack.webhook(slackConfig.webhookMessage, function(err, response) {
+    console.log(response);
+  });
+}
+
+function callback (error, response, body){
   if (!error && response.statusCode == 200) {
       let info = JSON.parse(body).Tables[0];
       let processData = [];
@@ -23,8 +33,7 @@ function callback(error, response, body) {
         });
         processData.push(obj);
       });
-      console.log(creatematrix(processData));
+      slackWebHook(creatematrix(processData));
     }
 }
- 
-rq(options, callback);
+rq(appInsightConfig, callback);

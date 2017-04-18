@@ -25,21 +25,19 @@ customEvents
 ) on featureName, event
 | project featureName, featureValue, event, totalPerFeature = count_ , totalPerEvent = sum_count_
 | extend percentageFired = ((totalPerFeature+0.0)/totalPerEvent )*100
+| where isnotempty(featureName) and isnotempty(featureValue) and isnotempty(event)
 | project featureName, featureValue, event, totalPerFeature,totalPerEvent, percentageFired
-| order by featureValue`;
+| extend enabled = (featureValue == 'baseline.v1' or featureValue == 'featureB.v1')
+| project featureName, enabled, event, totalPerFeature, totalPerEvent, percentageFired
+| order by featureName`;
 
 const encodedquery = encodeURIComponent(query.replace(/\n/, '').replace(/\s{2,}/, ''));
-const applicationID = 'ef8371a1-284f-425b-ad44-f687f047ef84';
 
-const config = {
-  appInsights: {
-    queryUrl: `https://api.applicationinsights.io/beta/apps/${applicationID}/query?query=${encodedquery}`,
-    appInsightsKey: 'sz0dgpdpfx17dfyvv2d6pcqcr2xxspc64o7yl88v',
-    variables: {
-      currentErrorCount: 'Tables.0.Rows.0.0',
-      averageCount: 'Tables.0.Rows.0.1'
-    }
+const appInsights = {
+  url: `https://api.applicationinsights.io/beta/apps/${__InsightID}/query?query=${encodedquery}`,
+  headers: {
+  	'x-api-key': __InsightKey
   }
 }
 
-module.exports = config;
+module.exports = appInsights;

@@ -1,19 +1,3 @@
- /*
-	row[0] = featureName
-	row[1] = featureValue
-	row[2] = Event
-	row[3] = fires
-	row[4] = totalFires
-	row[5] = Percentage
- */
-//Change this and the appInsights query to enable true and disable false
-const FEATUREVALUECONVENTIONNAME = {
-	'jsonToText.v1': false,
-	'baseline.v1': true,
-	'featureA.v1': false,
-	'featureB.v1': true
-}
-
 const getFeaturesMatrix = (processData) => {
 	return processData.reduce((featureList, obj) => {
 	  if(featureList.indexOf(obj.featureName) === -1 ){
@@ -24,15 +8,6 @@ const getFeaturesMatrix = (processData) => {
 		return processData.filter(obj => obj.featureName === feature);
 	});
 }
-
-// const getFeatureNames = (featureMatrix) => {
-// 	return featureMatrix.map(feature => feature.reduce((featureValue, obj) => {
-// 	  if(featureValue.indexOf(obj.featureValue) === -1 ){
-// 	     featureValue.push(obj.featureValue);
-// 	   }
-// 	   return featureValue;
-// 	},[]))
-// }
 
 const getListEvents = (processData) => {
 	return processData.reduce((eventList, obj) => {
@@ -81,7 +56,7 @@ const createAttachObject = (processedData) =>{
 	 				percentageFired: 0,
 	 			});
 	 		}
-	    let n = FEATUREVALUECONVENTIONNAME[eventList[0].featurevValue] ? 0 : 1;
+	    let n = eventList[0].enabled ? 0 : 1;
 	    eventList.forEach(event =>{
 	        myAttach.fields.push({
 	        	"title": eventList[n].event , 
